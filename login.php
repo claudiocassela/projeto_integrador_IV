@@ -23,7 +23,7 @@
 			<p class="p" style="margin-top:55px; color:blue;"><b>login:<b></p>
 			<input style="margin-top:50px;" name="log">
 			<p class="p" style="margin-top:95px; color:blue;"><b>password:<b></p>
-			<input style="margin-top:90px;;" type="pas" name="pas">
+			<input style="margin-top:90px;;" type="password" name="pas">
 			<button class="btn" style="left:40%; margin-top:130px; width:200px; height:40px; " onclick="envialog()">ACESSAR</button>
             <p class="p" style="margin-top:185px; color:gray;"></p>
 			</form>
