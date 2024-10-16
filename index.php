@@ -1,3 +1,10 @@
+<?php
+    session_start();
+    if(isset($_POST["off"])){
+        session_unset();
+        session_destroy();
+    }
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,11 +12,10 @@
 	<link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="js/jquery-1.4.min.js"></script>
 	<link rel="icon" type="image/png" href="cold.png" />
-	<title>Preciptação pluviométrica e Temperaturas médias na cidade de Sorocaba/SP</title>
+	<title>Precipitação pluviométrica e Temperaturas médias na cidade de Sorocaba/SP</title>
 </head>
 <body>
 <?php
-    session_start();
     include "conn.php";
     if(isset($_SESSION["id"])){
         include "start.php";

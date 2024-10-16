@@ -9,6 +9,12 @@ body{
 	margin:auto;
 	width:98%;
 }
+fieldset{
+    position: relative;
+    margin: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
 .div {
 	position:relative;
 	width:100%;
@@ -232,6 +238,13 @@ select {
 #link:hover{
 	cursor:pointer;
     background-color:beige;
+    font-weight:bolder;
+}
+
+.link:hover{
+	cursor:pointer;
+    background-color:beige;
+    font-weight:bolder;
 }
 
 .img_clinical{

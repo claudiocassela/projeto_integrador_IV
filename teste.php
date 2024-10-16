@@ -48,9 +48,6 @@ if(isset($i1)){
     }
 }
 $s=number_format($s,0);
-
-//temperatura
-
 $r=mysqli_query($conn,"select MIN(TEMPERATURA) as mn from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and TEMPERATURA<>'0'");
 while($l=mysqli_fetch_array($r)){
     $mn=$l["mn"];
@@ -68,48 +65,11 @@ while($g=mysqli_fetch_array($a)){
     $md=$g["tp"];
 }
 
-//precipitação pluviométrica
-
-$a=mysqli_query($conn,"select avg(PRECIPTACAO) as ap from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and TEMPERATURA<>'0'");
-while($g=mysqli_fetch_array($a)){
-    $ap=$g["ap"];
-}
-$z=mysqli_query($conn,"select MAX(PRECIPTACAO) as mp from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di'");
-while($b=mysqli_fetch_array($z)){
-    $mp=$b["mp"];
-}
-$o=mysqli_query($conn,"select COUNT(PRECIPTACAO) as pp from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and PRECIPTACAO<>'0'");
-while($b=mysqli_fetch_array($o)){
-    $pp=$b["pp"];
-}
-
-//datas desconsideradas
-$o=mysqli_query($conn,"select COUNT(PRECIPTACAO) as dd from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and (PRECIPTACAO='0' and TEMPERATURA='0')");
-while($b=mysqli_fetch_array($o)){
-    $dd=$b["dd"];
-}
-$k=mysqli_query($conn,"select COUNT(PRECIPTACAO) as dt from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di'");
-while($b=mysqli_fetch_array($k)){
-    $dt=$b["dt"];
-}
-
-$c='
-
-<fieldset style="margin-top:20px; margin-bottom:20px; width:80%;">
-            <legend style="color:red">Dados registrados manualmente dos dias '.$di.'/'.$me.' entre os anos de 1961 à 2024 na cidade de Sorocaba/SP - <i>INMET(2024)</i></legend>
-
-    <fieldset style="margin-top:20px; margin-bottom:20px; width:80%;">
-            <legend>Dados a serem considerados no período</legend>
-    <div class="div">
-        <p class="p">parâmetro geral de medição manual no período ==> '.number_format($dt,0).' dias</p>
-    </div>
-    <div class="div">
-        <p class="p">datas desconsideradas por falta de medição manual no período ==> '.number_format($dd,0).' dias</p>
-    </div>
-    </fieldset>
-
-    <fieldset style="margin-top:20px; margin-bottom:20px; width:80%;">
-            <legend>Dados a serem considerados - temperartura</legend>
+$c='<style>
+        .div{
+                width:80%;
+            }
+    </style>
     <div class="div">
         <p class="p">temperatura máxima registrada no período ==> '.number_format($mx,0).'&ordm;C</p>
     </div>
@@ -125,22 +85,6 @@ $c='
     <div class="div">
         <p class="p">temperatura mediana registrada no período ==> '.number_format($j,0).'&ordm;C</p>
     </div>
-    </fieldset>
-
-    <fieldset style="margin-top:20px; margin-bottom:20px; width:80%;">
-            <legend>Dados a serem considerados - precipitação pluviométrica</legend>
-    <div class="div">
-        <p class="p">precipitação pluviométrica máxima registrada no período ==> '.number_format($mp,0).'mm</p>
-    </div>
-    <div class="div">
-        <p class="p">precipitação pluviométrica média registrada no período ==> '.number_format($ap,2).'mm</p>
-    </div>
-    <div class="div">
-        <p class="p">precipitação pluviométrica dias registrados no período ==> '.number_format($pp,0).' dias</p>
-    </div>
-    </fieldset>
-
-</fieldset>
 ';
 ?>
 
@@ -149,7 +93,7 @@ $c='
 <head>
 	<link rel="icon" type="image/png" href="cold.png" />
     <link rel="stylesheet" href="style.css">
-	<title>Precipitação pluviométrica e Temperaturas médias na cidade de Sorocaba/SP</title>
+	<title>Preciptação pluviométrica e Temperaturas médias na cidade de Sorocaba/SP</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
       google.charts.load('current', {'packages':['corechart']});
@@ -157,12 +101,12 @@ $c='
 
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
-          ['Ano', 'Temperatura', 'Precipitação Pluviométrica'],
+          ['Ano', 'Temperatura', 'Preciptação Pluviométrica'],
           <?php echo $var; ?>
         ]);
 
         var options = {
-          title: '<?php echo "Gráfico comparativo de  oscilações entre temperaturas e precipitações pluviométricas dos dias ".$di."/".$me." entre os anos de 1961 à 2024 na cidade de Sorocaba/SP - INMET(2024)"; ?>',
+          title: '<?php echo "Gráfico de  oscilações das temperaturas dos dias ".$di."/".$me." entre os anos de 1961 à 2024 na cidade de Sorocaba/SP"; ?>',
           hAxis: {title: 'Ano',  titleTextStyle: {color: '#333'}},
           vAxis: {minValue: 0}
         };
