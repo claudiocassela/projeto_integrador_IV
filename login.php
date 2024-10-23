@@ -20,6 +20,7 @@
     </script>
     <form name="FenviaLog" action="index.php" method="post">
 		<div class="dcenter" style="margin-top:150px">
+            <img class="ilo" src="cold.png">
 			<p class="p" style="margin-top:55px; color:blue;"><b>login:<b></p>
 			<input style="margin-top:50px;" name="log">
 			<p class="p" style="margin-top:95px; color:blue;"><b>password:<b></p>

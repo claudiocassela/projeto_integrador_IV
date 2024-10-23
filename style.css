@@ -9,6 +9,12 @@ body{
 	margin:auto;
 	width:98%;
 }
+fieldset{
+    position: relative;
+    margin: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
 .div {
 	position:relative;
 	width:100%;
@@ -126,9 +132,9 @@ select {
 .sub_menu:hover{
 	font-size:15px;
 	cursor:pointer;
-	color:pink;
-    border-bottom:1px solid pink;
-    border-left:10px solid pink;
+	color:blue;
+    border-bottom:1px solid blue;
+    border-left:10px solid blue;
 }
 
 .div_principal{
@@ -231,6 +237,14 @@ select {
 
 #link:hover{
 	cursor:pointer;
+    background-color:beige;
+    font-weight:bolder;
+}
+
+.link:hover{
+	cursor:pointer;
+    background-color:beige;
+    font-weight:bolder;
 }
 
 .img_clinical{
@@ -256,4 +270,15 @@ legend{
 }
 fieldset{
     border:1px solid #90CAF9;
+}
+.ilo{
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    margin-left: 0;
+    margin-top: 0;
+    left: 30px;
+    top: -150px;
+    z-index: -100;
+    opacity: 0.3;
 }

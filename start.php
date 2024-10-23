@@ -219,7 +219,7 @@ $s=number_format($s,0);
 
 $r=mysqli_query($conn,"select MIN(TEMPERATURA) as mn from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and TEMPERATURA<>'0'");
 while($l=mysqli_fetch_array($r)){
-    $mn=$l["mn"];
+    $my=$l["mn"];
 }
 $z=mysqli_query($conn,"select MAX(TEMPERATURA) as mx from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di'");
 while($b=mysqli_fetch_array($z)){
@@ -232,6 +232,7 @@ while($g=mysqli_fetch_array($a)){
 $a=mysqli_query($conn,"SELECT TEMPERATURA as tp, COUNT(TEMPERATURA) AS mo FROM projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and TEMPERATURA<>'0' GROUP BY TEMPERATURA ORDER BY mo DESC LIMIT 1;");
 while($g=mysqli_fetch_array($a)){
     $md=$g["tp"];
+    $mv=$g["mo"];
 }
 
 //precipitação pluviométrica
@@ -243,6 +244,10 @@ while($g=mysqli_fetch_array($a)){
 $z=mysqli_query($conn,"select MAX(PRECIPTACAO) as mp from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di'");
 while($b=mysqli_fetch_array($z)){
     $mp=$b["mp"];
+}
+$z=mysqli_query($conn,"select MIN(PRECIPTACAO) as mn from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and PRECIPTACAO<>'0'");
+while($b=mysqli_fetch_array($z)){
+    $mn=$b["mn"];
 }
 $o=mysqli_query($conn,"select COUNT(PRECIPTACAO) as pp from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and PRECIPTACAO<>'0'");
 while($b=mysqli_fetch_array($o)){
@@ -258,6 +263,51 @@ $k=mysqli_query($conn,"select COUNT(PRECIPTACAO) as dt from projeto_integrador w
 while($b=mysqli_fetch_array($k)){
     $dt=$b["dt"];
 }
+
+//indices
+$rs=$dt-$dd;
+$k=mysqli_query($conn,"select COUNT(PRECIPTACAO) as dt from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and PRECIPTACAO>'50' limit 1");
+while($b=mysqli_fetch_array($k)){
+    $ia=$b["dt"];  
+    $ie=($ia/$rs)*100;
+    $ia=($ia/$pp)*100;
+}
+$k=mysqli_query($conn,"select COUNT(PRECIPTACAO) as dt from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and (PRECIPTACAO>'25' and PRECIPTACAO<'50') limit 1");
+while($b=mysqli_fetch_array($k)){
+    $ib=$b["dt"];  
+    $if=($ib/$rs)*100;
+    $ib=($ib/$pp)*100;
+}
+$k=mysqli_query($conn,"select COUNT(PRECIPTACAO) as dt from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and (PRECIPTACAO>='5' and PRECIPTACAO<='25') limit 1");
+while($b=mysqli_fetch_array($k)){
+    $ic=$b["dt"];  
+    $ig=($ic/$rs)*100;
+    $ic=($ic/$pp)*100;
+}
+$k=mysqli_query($conn,"select COUNT(PRECIPTACAO) as dt from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and (PRECIPTACAO<'5' and PRECIPTACAO<>'0') limit 1");
+while($b=mysqli_fetch_array($k)){
+    $id=$b["dt"];  
+    $ih=($id/$rs)*100;
+    $id=($id/$pp)*100;
+}
+
+$df=($mx-$my);  $col='';   $dz=0;
+for($w=0;$w<=$df;$w++){
+    $rg=$my+$w;
+    $k=mysqli_query($conn,"select COUNT(TEMPERATURA) as dt from projeto_integrador where month(MEDICAO)='$me' and day(MEDICAO)='$di' and TEMPERATURA='$rg' limit 1");
+    while($b=mysqli_fetch_array($k)){
+        $t[$w]=$b["dt"];  
+        $dz=($t[$w]/$rs)*100;
+        $col.='
+            <div class="div lo">
+                <p class="p">probabilidade de temperatura ==> '.number_format($dz,2).'% <i style="text-transform:lowercase;">para</i> '.number_format($rg,0).'&ordm;C</p>
+            </div>
+
+        ';
+    }
+}
+
+
 
 $c='
 
@@ -280,7 +330,7 @@ $c='
         <p class="p">temperatura máxima registrada no período ==> '.number_format($mx,0).'&ordm;C</p>
     </div>
     <div class="div">
-        <p class="p">temperatura mínima registrada no período ==> '.number_format($mn,0).'&ordm;C</p>
+        <p class="p">temperatura mínima registrada no período ==> '.number_format($my,0).'&ordm;C</p>
     </div>
     <div class="div">
         <p class="p">temperatura média registrada no período ==> '.number_format($av,0).'&ordm;C</p>
@@ -297,6 +347,9 @@ $c='
             <legend>Dados a serem considerados - precipitação pluviométrica</legend>
     <div class="div">
         <p class="p">precipitação pluviométrica máxima registrada no período ==> '.number_format($mp,0).'mm</p>
+    </div>
+    <div class="div">
+        <p class="p">precipitação pluviométrica mínima registrada no período ==> '.number_format($mn,0).'mm</p>
     </div>
     <div class="div">
         <p class="p">precipitação pluviométrica média registrada no período ==> '.number_format($ap,2).'mm</p>
@@ -336,6 +389,178 @@ $c='
     echo $c;
 
 //fim da medicao diaria
+                    switch($me){
+                        case 1: $zm='Janeiro'; break;
+                        case 2: $zm='Fevereiro'; break;
+                        case 3: $zm='Março'; break;
+                        case 4: $zm='Abril'; break;
+                        case 5: $zm='Maio'; break;
+                        case 6: $zm='Junho'; break;
+                        case 7: $zm='Julho'; break;
+                        case 8: $zm='Agosto'; break;
+                        case 9: $zm='Setembro'; break;
+                        case 10: $zm='Outubro'; break;
+                        case 11: $zm='Novembro'; break;
+                        case 12: $zm='Dezembro'; break;
+                    }
+    $re = ($pp*100)/($dt-$dd);
+    $te = ($mv*100)/($dt-$dd);
+    echo '
+    <style>
+        .area{
+                position:absolute;
+                z-index:5000;
+                top:0;
+                right:0;
+                margin-top:3px;
+                margin-right:3px;
+                display:none; 
+                width:100px;       
+            }
+        .div{
+                z-index:100;
+            }
+        #content {
+        display: none;
+        }
+        .loc{
+            position:absolute;
+            background-color:white; 
+            z-index:5000; 
+            font-weight:bolder; 
+            right:0; 
+            margin-right: 3px;
+            top:0;
+            margin-top:1px;
+            }
+        input[type="text"]{
+            color: transparent;
+            text-shadow: 0 0 0 #000;
+            padding: 6px 12px;
+            width: 100px;
+            cursor: pointer;
+            right:0;
+            margin-right:150px;
+            top:0; 
+            margin-top:-24px;
+            height:16px;
+            border:none;
+            background-color:transparent;
+            font-weight:bolder;
+            font-style:italic;
+        }
+            input[type="text"]:focus{
+                outline: none;
+        }
+            input:focus + div#content {
+            display: block;
+        }
+        .lo{
+            border:none;
+        }
+    </style>
+        <fieldset style="margin-top:20px; margin-bottom:20px; width:80%; border:1px solid red">
+            <legend style="color:red">resultados da análise para o dia '.$di.' do mês de '.$zm.' do ano de 2025</legend>
+            <div class="div" style="border:none;"></div>
+            <fieldset>
+            <legend>precipitação pluviométrica</legend>            
+            <div class="div" style="border:none;>
+                <p class="p"><span style="font-weight:bolder;">probabilidade de precipitação pluviométrica ==> '.number_format($re,2).'%</span></p>                
+            </div>
+            <fieldset>
+            <legend>cenário parcial</legend>
+            <div class="div lo">
+                <p class="p">probabilidade de precipitação pluviométrica com índice chuva muito forte ==> '.number_format($ia,2).'%</p>                
+            </div>
+            <div class="div lo">
+                <p class="p">probabilidade de precipitação pluviométrica com índice chuva forte ==> '.number_format($ib,2).'%</p>                
+            </div>
+            <div class="div lo">
+                <p class="p">probabilidade de precipitação pluviométrica com índice chuva moderada ==> '.number_format($ic,2).'%</p>                
+            </div>
+            <div class="div lo">
+                <p class="p">probabilidade de precipitação pluviométrica com índice chuva fraca ==> '.number_format($id,2).'%</p>                
+            </div>
+            </fieldset>
+            <fieldset>
+            <legend>cenário geral</legend>
+            <div class="div lo">
+                <p class="p">probabilidade de precipitação pluviométrica com índice chuva muito forte ==> '.number_format($ie,2).'%</p>                
+            </div>
+            <div class="div lo">
+                <p class="p">probabilidade de precipitação pluviométrica com índice chuva forte ==> '.number_format($if,2).'%</p>                
+            </div>
+            <div class="div lo">
+                <p class="p">probabilidade de precipitação pluviométrica com índice chuva moderada ==> '.number_format($ig,2).'%</p>                
+            </div>
+            <div class="div lo">
+                <p class="p">probabilidade de precipitação pluviométrica com índice chuva fraca ==> '.number_format($ih,2).'%</p>                
+            </div>
+            </fieldset>
+            </fieldset>
+            <div class="div" style="border:none; top:-335px; height:0">
+            <input type="text" value="ÍNDICES***">
+                <div id="content" class="loc">
+                        &#9928;&nbsp;Chuva fraca: abaixo de 5,0 mm/h;<br>
+                        &#9928;&nbsp;Chuva moderada: entre 5,0 e 25 mm/h;<br>
+                        &#9928;&nbsp;Chuva forte: entre 25,1 e 50 mm/h;<br>
+                        &#9928;&nbsp;Chuva muito forte: acima de 50,0 mm/h;
+                </div>
+            </div>
+
+
+            <fieldset>
+            <legend>temperatura</legend>
+                <fieldset>
+            '.$col.'
+                </fieldset>
+            </fieldset>
+        </fieldset>
+
+    ';
+        break;
+        case 3:
+echo    '
+            <style>
+                .text{
+                    position:relative;
+                    text-transform:none;
+                    width:100%;
+                    text-align:justify;
+                    font-size:18px;
+                    top:0;
+                    margin-top:2px;
+                    line-height:2;
+                    }
+            </style>
+            <div class="div" style="border:none; border-bottom:2px solid red; margin-top:40px; margin-bottom:40px; width:90%;">
+                <p class="p" style="width:95%; text-align:center; font-weight:bolder;">
+                    Instruções de utilização:
+                </p>
+            </div>
+            <div class="div" style="border:none; width:80%; height:850px;">
+                <p class="text">
+                    &#9728;&nbsp;Acesse o menú visão geral;<br>
+                        &nbsp;&nbsp;&#10053;&nbsp;Ao acessar esta página, você terá uma compilação geral do banco de dados, organizados anualmente e subdivididos mensalmente;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Informações referentes ao mês são acumulativas ao período e quantidade de dias aferidas manualmente;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Dados inconsistentes (background:vermelho) foram desconsiderados pelo Sistema;<br>
+                    &#9728;&nbsp;Clique no mês, correspondente ao ano, para ter acesso a uma visão detalhada do mês;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Ao acessar esta página, você terá um detalhamento do período solicitado, um gráfico com os dados do mês preterido;   
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Disposição diária das informações de temperatura e precipitação pluviométrica do mês pesquisado;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Gráfico das métricas de temperatura e precipitação pluviométrica do mês pesquisado;<br>
+                   &#9728;&nbsp;Clique no dia para ter acesso a análise detalhada do dia futuro;<br>  
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Disposição das informações de temperatura e precipitação pluviométrica do dia pesquisado;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Gráfico das métricas de temperatura e precipitação pluviométrica do dia pesquisado;<br> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Análise comportamental, em tempo de execução, das informações dispostas;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#10053;&nbsp;Análise antecipativa da data pesquisada;<br><br>
+                    &#9728;&nbsp;<b>Índices adotados</b> (https://canaltech.com.br/meio-ambiente/o-que-e-indice-pluviometrico-e-como-ele-mede-milimetros-de-chuva-240698/, acesso em 01.10.2024)<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9928;&nbsp;Chuva fraca: abaixo de 5,0 mm/h;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9928;&nbsp;Chuva moderada: entre 5,0 e 25 mm/h;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9928;&nbsp;Chuva forte: entre 25,1 e 50 mm/h;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9928;&nbsp;Chuva muito forte: acima de 50,0 mm/h;<br>
+                </p>
+            </div>
+        ';
         break;
     }
     
@@ -358,7 +583,7 @@ $c='
                     Análise de Padrões e Tendências Climáticas em Sorocaba: Um Estudo Analítico-Histórico com Dados do INMET (1961-2023)
                 </p>
             </div>
-            <div class="div" style="border:none; width:80%;">
+            <div class="div" style="border:none; width:80%; height:300px; margin-bottom:30px;">
                 <p class="text">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     O aumento na frequência de fenômenos climáticos extremos, como secas e enchentes, levanta preocupações sobre a sustentabilidade e segurança de várias comunidades na cidade de Sorocaba. O presente estudo pretende analisar a correlação entre temperatura e precipitação em Sorocaba de 1961 a 2023, de modo a buscar entender como essas variáveis interagem e impactam em tais eventos. O projeto pretende ainda incluir o desenvolvimento de uma plataforma de mineração de dados, que permitirá a visualização e análise dos dados climáticos, que por sua vez poderá contribuir para estratégias de adaptação e mitigação. O projeto poderá 
