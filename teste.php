@@ -280,6 +280,84 @@ $c='
                     }
     $re = ($pp*100)/($dt-$dd);
     $te = ($mv*100)/($dt-$dd);
+    $va='';
+    if(isset($_POST["od"])){
+    $to=$_POST["od"];
+        } else {
+            $to=0;
+        }
+        $tit='';
+            switch($to){
+                case 0: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by PRECIPTACAO");
+                $tit='amostra 1 - ordenação disposta pelo fator precipitação pluviométrica';
+                break;
+                case 1: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by TEMPERATURA");
+                $tit='amostra 1 - ordenação disposta pelo fator temperatura';
+                break;
+                case 2: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by MEDICAO");
+                $tit='amostra 1 - ordenação disposta pelo fator dia';
+                break;
+                case 3: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by month(MEDICAO),day(MEDICAO),year(MEDICAO)");
+                $s=mysqli_query($conn,"select count(MEDICAO) as co, month(MEDICAO) as mh from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' group by month(MEDICAO) order by month(MEDICAO),day(MEDICAO),year(MEDICAO)");
+                if(mysqli_num_rows($s)>0){
+                    $vb='';
+                    $z=0;   $f=0;   $rf=0;
+                    $va='<fieldset style="margin-top:20px; margin-bottom:20px; width:80%; border:1px solid red"><legend>amostra 2 - contagem mensal de dias com ocorrência de chuva muito forte entre os anos de 1961 a 2024</legend>';
+                    while($l=mysqli_fetch_array($s)){
+                        switch($l["mh"]){
+                            case 1: $zm='Janeiro'; break;
+                            case 2: $zm='Fevereiro'; break;
+                            case 3: $zm='Março'; break;
+                            case 4: $zm='Abril'; break;
+                            case 5: $zm='Maio'; break;
+                            case 6: $zm='Junho'; break;
+                            case 7: $zm='Julho'; break;
+                            case 8: $zm='Agosto'; break;
+                            case 9: $zm='Setembro'; break;
+                            case 10: $zm='Outubro'; break;
+                            case 11: $zm='Novembro'; break;
+                            case 12: $zm='Dezembro'; break;
+                        }
+                        $z++;   $rf=($l["co"]*100)/$dt;   $rf=number_format($rf,2)."%";
+                        $vb.='<div class="div point" style="width:32%; margin-left:2px; border:1px solid black; float:left; height:40px;">
+                                    <p class="p" style="margin-left:0px; width:100%; text-align:center;"><span style="font-weight:bolder; color:black; ">'.$zm.' ==> '.$l["co"].' dias<br>probabilidade:'.$rf.'</p>       
+                              </div>';
+                    }
+                }
+                $tit='amostra 1 - ordenação disposta pelo fator mês';
+                //desvio padrão
+                    $dp=$dt/$z; $dp=number_format($dp,0);
+                    $rs='
+                        <div class="div" style="border:none;">
+                            <p class="p" style="color:blue"><b>desvio padrão (<span style="text-transform:lowercase;">&#963;</span>) ==> '.$dp.' dias/mês</b></p>
+                        </div>
+                    ';
+                    $va.=$rs.$vb.'</fieldset>';
+                break;
+                case 4: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by year(MEDICAO),month(MEDICAO),day(MEDICAO)");
+                $s=mysqli_query($conn,"select count(MEDICAO) as co, year(MEDICAO) as mh, sum(PRECIPTACAO) as pr from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' group by year(MEDICAO) order by year(MEDICAO),month(MEDICAO),day(MEDICAO)");
+                if(mysqli_num_rows($s)>0){
+                    $va='<fieldset style="margin-top:20px; margin-bottom:20px; width:80%; border,:1px solid red"><legend>amostra 2 - contagem anual de dias com ocorrência de chuva muito forte entre os anos de 1961 a 2024</legend>';
+                    $vb='';
+                    $z=0;   $f=0;
+                    while($l=mysqli_fetch_array($s)){
+                        $z++;   $f=$l["pr"]/$l["co"];   $f=number_format($f,2);
+                        $vb.='<div class="div point" style="width:19%; margin-left:2px; border:1px solid black; float:left; height:80px">
+                                    <p class="p" style="margin-left:0px; padding-left:10px; width:100%; text-align:left; font-weight:bolder;"><span style=" color:blue; ">ano: '.$l["mh"].'</span><br>dias: '.$l["co"].'<br>acumulado: '.$l["pr"].'mm<br>média: '.$f.'mm</p>       
+                              </div>';
+                    }                    
+                    //desvio padrão
+                    $dp=$dt/$z; $dp=number_format($dp,0);
+                    $rs='
+                        <div class="div" style="border:none;">
+                            <p class="p" style="color:blue"><b>desvio padrão (<span style="text-transform:lowercase;">&#963;</span>) ==> '.$dp.' dias/ano</b></p>
+                        </div>
+                    ';
+                    $va.=$rs.$vb.'</fieldset>';
+                }
+                $tit='amostra 1 - ordenação disposta pelo fator ano';
+                break;
+            }
     echo '
     <style>
         .area{
@@ -374,7 +452,7 @@ $c='
     <form name="ftem" method="post" action="teste.php"><input type="hidden" name="od" value="1"></form>
     <form name="fplu" method="post" action="teste.php"><input type="hidden" name="od" value="0"></form>
     <fieldset style="margin-top:20px; margin-bottom:20px; width:80%; border:1px solid red">
-            <legend style="color:red">datas consideradas</legend>
+            <legend style="color:red">'.$tit.'</legend>
             <div class="div" style="border:none; margin-bottom:10px; border-bottom:2px solid blue; border-top:2px solid blue;">
                 <p class="p u" title="clique aqui para ordenar por dia" onclick="dia()">dia</p>
                 <p class="p u" title="clique aqui para ordenar por mês" onclick="mes()">mês</p>
@@ -383,23 +461,7 @@ $c='
                 <p class="p u" title="clique aqui para ordenar por precipitação pluviométrica" onclick="plu()" style="width:300px">precipitação pluviomátrica</p>
             </div>
             ';
-if(isset($_POST["od"])){
-    $to=$_POST["od"];
-} else {
-    $to=0;
-}
-    switch($to){
-        case 0: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by PRECIPTACAO");
-        break;
-        case 1: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by TEMPERATURA");
-        break;
-        case 2: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by MEDICAO");
-        break;
-        case 3: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by month(MEDICAO),day(MEDICAO),year(MEDICAO)");
-        break;
-        case 4: $sql=mysqli_query($conn,"select TEMPERATURA as tp, PRECIPTACAO as pr, MEDICAO as dia from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' order by year(MEDICAO),day(MEDICAO),month(MEDICAO)");
-        break;
-    }
+
     echo $POST["od"];
 $en='';
 while($l=mysqli_fetch_array($sql)){
@@ -413,7 +475,101 @@ while($l=mysqli_fetch_array($sql)){
                 <p class="p" style="margin-left:0px; width:100%; text-align:center;"><span style="font-weight:bolder; color:'.$en.'; ">'.date("d/m/Y",strtotime($l["dia"])).' ==> '.$l["tp"].'&ordm;C ==> '.$l["pr"].'mm</span></p>                
         </div>';
 }
-    echo '</fieldset>';
+    echo '</fieldset>'.$va;
+
+    //previsão final
+    $s=mysqli_query($conn,"select count(MEDICAO) as co, month(MEDICAO) as mh from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' group by month(MEDICAO) order by month(MEDICAO),day(MEDICAO),year(MEDICAO)");
+    $z=0;   $at=array();    $ft=0;
+    while($l=mysqli_fetch_array($s)){
+        $z++; //quantidade de meses
+        $ft=$l["co"]/$dt;
+        array_push($at,array($ft,$l["co"],$l["mh"])); //quantidade do mes
+    }
+    $d=number_format($dt/$z,0); //desvio padrão mes
+    sort($at);
+    $n=count($at);
+    
+    
+    
+ 
+    $xt=array();    $p=0;    $so=0;
+    for($x=0;$x<$n;$x++){
+        if($at[$x][1]>=$d){
+            array_push($xt,array($at[$x][0],$at[$x][1],$at[$x][2]));
+            $so+=$at[$x][1];
+            $p++;
+        }
+    }
+    sort($xt);
+    $s=mysqli_query($conn,"select count(MEDICAO) as co, year(MEDICAO) as mh, sum(PRECIPTACAO) as pr from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' group by year(MEDICAO) order by year(MEDICAO),month(MEDICAO),day(MEDICAO)");
+    $z=0;   $h=0;
+    
+    while($l=mysqli_fetch_array($s)){
+        $z++;
+        $h+=$l["co"];
+    }
+    
+    $e=number_format($h/$z,0); //desvio padrão anual
+    $p=$p/$e;
+    $n=count($xt);  $sm=0;
+    $so=($so*100)/$dt;
+    $ar=array();
+    $nmr=0; $nmx=0;
+    for($x=0;$x<$n;$x++){
+        $sm=($xt[$x][0]*100)/$so;
+        $mes=$xt[$x][2];
+        array_push($ar,array($mes,$sm));        
+        $s=mysqli_query($conn,"select day(MEDICAO) as co from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' and month(MEDICAO)='$mes'");
+        $nmr+=mysqli_num_rows($s);
+        $s=mysqli_query($conn,"select day(MEDICAO) as co from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' and month(MEDICAO)='$mes' group by day(MEDICAO)");
+        $nmx+=mysqli_num_rows($s);
+    }
+    
+    echo "<br>".$nmr;
+    echo "<br>".$nmx."<br>";
+    $nmr=number_format($nmr/$nmx,2);
+    echo "<br>".$nmr."<br>";
+
+$pes=0;
+sort($ar);
+$atz=array();
+for($x=0;$x<$n;$x++){
+    $mes=$ar[$x][0];
+    $pes=$ar[$x][1];
+    $s=mysqli_query($conn,"select day(MEDICAO) as di from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' and month(MEDICAO)='$mes' group by day(MEDICAO) order by day(MEDICAO)");
+     $nmj=0;
+     while($l=mysqli_fetch_array($s)){
+         $nmj=$l["di"];
+         $sj=mysqli_query($conn,"select count(day(MEDICAO)) as co from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' and (day(MEDICAO)='$nmj' and month(MEDICAO)='$mes')");
+         while($lj=mysqli_fetch_array($sj)){
+             if($lj["co"]>$nmr){
+                 array_push($atz,array($l["di"],$mes,$lj["co"],$pes));
+            //echo $lj["co"]." ==> ".$l["di"]."/".$mes."<br>";
+             }
+         }
+     }
+}
+
+sort($atz);
+$n=count($atz);
+for($x=0;$x<$n;$x++){
+    echo $atz[$x][0]." ==> ".$atz[$x][1]." ==> ".$atz[$x][2]." ==> ".$atz[$x][3]."<br>";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     ?>
     </body>
 </html>
