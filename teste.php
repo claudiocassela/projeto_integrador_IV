@@ -1,5 +1,24 @@
 <?php
 session_start();
+if(!isset($_SESSION["id"])){
+	echo '<script>location.href="index.php";</script>';
+}
+function search($array, $key, $value)
+{
+    $results = array();
+
+    if (is_array($array)) {
+        if (isset($array[$key]) && $array[$key] == $value) {
+            $results[] = $array;
+        }
+
+        foreach ($array as $subarray) {
+            $results = array_merge($results, search($subarray, $key, $value));
+        }
+    }
+
+    return $results;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -187,7 +206,7 @@ for($w=0;$w<=$df;$w++){
 $c='
 
 <fieldset style="margin-top:20px; margin-bottom:20px; width:80%;">
-            <legend style="color:red">precipitações pluviométricas >50mm registradas entre os anos de 1961 à 2024 na cidade de Sorocaba/SP -  <i>INMET(2024)</i></legend>
+            <legend style="color:red">precipitações pluviométricas =>50mm registradas entre os anos de 1961 à 2024 na cidade de Sorocaba/SP -  <i>INMET(2024)</i></legend>
 
     <fieldset style="margin-top:20px; margin-bottom:20px; width:80%;">
             <legend>Dados a serem considerados no período</legend>
@@ -250,7 +269,7 @@ $c='
         ]);
 
         var options = {
-          title: '<?php echo "Gráfico comparativo entre temperaturas e precipitações pluviométricas >50mm entre os anos de 1961 à 2024 na cidade de Sorocaba/SP - INMET(2024)"; ?>',
+          title: '<?php echo "Gráfico comparativo entre temperaturas e precipitações pluviométricas =>50mm entre os anos de 1961 à 2024 na cidade de Sorocaba/SP - INMET(2024)"; ?>',
           hAxis: {title: 'Ano',  titleTextStyle: {color: '#333'}},
           vAxis: {minValue: 0}
         };
@@ -524,11 +543,7 @@ while($l=mysqli_fetch_array($sql)){
         $s=mysqli_query($conn,"select day(MEDICAO) as co from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' and month(MEDICAO)='$mes' group by day(MEDICAO)");
         $nmx+=mysqli_num_rows($s);
     }
-    
-    echo "<br>".$nmr;
-    echo "<br>".$nmx."<br>";
     $nmr=number_format($nmr/$nmx,2);
-    echo "<br>".$nmr."<br>";
 
 $pes=0;
 sort($ar);
@@ -543,8 +558,7 @@ for($x=0;$x<$n;$x++){
          $sj=mysqli_query($conn,"select count(day(MEDICAO)) as co from projeto_integrador where TEMPERATURA<>'0' and PRECIPTACAO>='50' and (day(MEDICAO)='$nmj' and month(MEDICAO)='$mes')");
          while($lj=mysqli_fetch_array($sj)){
              if($lj["co"]>$nmr){
-                 array_push($atz,array($l["di"],$mes,$lj["co"],$pes));
-            //echo $lj["co"]." ==> ".$l["di"]."/".$mes."<br>";
+                 array_push($atz,array($mes,$l["di"],$lj["co"],$pes));
              }
          }
      }
@@ -552,21 +566,97 @@ for($x=0;$x<$n;$x++){
 
 sort($atz);
 $n=count($atz);
+$fts=array(); //reunindo mes e incidência nos dias
+$q=0;   $qp=0;  $qz=0;  $g=0;
 for($x=0;$x<$n;$x++){
-    echo $atz[$x][0]." ==> ".$atz[$x][1]." ==> ".$atz[$x][2]." ==> ".$atz[$x][3]."<br>";
+    $g++;
+    if($qz==0){
+        $qz=$atz[$x][0];
+    }
+    $q=$atz[$x][0];
+    if($qz!=$q){
+        $qp=0;
+    }
+    $qp+=$atz[$x][2];
+    if($atz[$x][0]!=$atz[$g][0]){
+        array_push($fts,array($atz[$x][0],$qp));
+    }
+    $qz=$atz[$x][0];
+}
+
+
+sort($fts);
+$nz=count($fts);
+//echo $nz."<br>";
+    for($g=0;$g<$nz;$g++){
+        $ss=$fts[$g][0];
+        $sd=$fts[$g][1];
+        $_SESSION["vr".$ss]=$sd;
+		//echo $ss."==>".$_SESSION["vr".$ss]."<br>";
+    }
+
+//echo "=======================<br>";
+
+$tt=''; $y=0;
+for($x=0;$x<$n;$x++){    
+     $pf=$atz[$x][0];
+     $do=$atz[$x][2];
+     $vr=$_SESSION["vr".$pf];
+//echo $pf."==>".$_SESSION["vr".$pf]."<br>";	 
+    // 
+	if($vr!=0){
+	 $pr=number_format($atz[$x][3]*100,2);
+     $mr=($pr*$do)/$vr; $mr=number_format($mr,4);
+     
+     $tt.= '<div class="div point" style="width:32%; margin-left:2px; border:1px solid black; float:left; height:80px">
+                <p class="p" style="margin-left:0px; padding-left:10px; width:100%; text-align:left; font-weight:bolder;">data ==> '.$atz[$x][1].'/'.$pf.'<br>registro(s) ==> '.$atz[$x][2].' dias<br>prob.(<span style-"text-transform:lowercase;">&xi;</span>) mês ==> '.$pr.'%<br>
+                prob.(<span style-"text-transform:lowercase;">&xi;</span>) dia ==> '.$mr.'%
+                </p>
+            </div>';
+	}
 }
 
 
 
 
+echo '
+<fieldset style="border:1px solid red; width:80%;">
+    <legend>análise</legend>
+    <fieldset style="margin-bottom:20px;">
+        <legend>parâmetros utilizados</legend>
+        <div class="div">
+            <p class="p"><b>período analisado ==> base dados inmet, com mensuração manual, entre os anos de 1961 à 2024</b></p>
+        </div>
+        <div class="div">
+            <p class="p"><b>dias em que houveram ocorrências de chuva muito forte (>50mm) dentro do período mensurado ==> '.$dt.' dias</b></p>
+        </div>
+        <div class="div k">
+            <p class="p"><b>desvio padrão (<span style="text-transform:lowercase;">&#963;</span>) ano ==> '.$e.' dia(s)</b><br>
+            *quantidade de dias de enconrrências encontradas a cada ano, durante todo o período.
+        </p>
+        </div>
+        <div class="div k">
+            <p class="p"><b>desvio padrão (<span style="text-transform:lowercase;">&#963;</span>) mês ==> '.$d.' dia(s)</b><br>
+            *quantidade de dias encontrada, durante todo o período de anos, separadas por mês da ocorrência.
+        </p>
+        </div>
+        <div class="div k">
+            <p class="p"><b>desvio padrão (<span style="text-transform:lowercase;">&#963;</span>) dia ==> '.$nmr.' dia(s)</b><br>
+            *quantidade de dias encontrada, durante todo o período de anos, identificadas por dia, dentro de um período mensal.
+        </p>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>amostra 3 - ocorrências acima do desvio padrão (<span style="text-transform:lowercase;">&#963;</span>) dia</legend>
+        '.$tt.'
+    </fieldset>
+';
 
 
 
-
-
-
-
-
+echo '
+</fieldset>
+';
 
 
 

@@ -1,7 +1,7 @@
 <?php
-$serv = "sql101.infinityfree.com";
-$user = "if0_36170843";
+$serv = "mysql.projetointegrador4.com.br";
+$user = "projetointegra03";
 $pass = "z8duYCVXTD4F";
-$data = "if0_36170843_univesp";
+$data = "projetointegra03";
 $conn = new mysqli($serv, $user, $pass, $data);
 ?>
