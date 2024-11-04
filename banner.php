@@ -25,15 +25,15 @@
         <div class="sub_menu" onclick="principal()">
             principal
         </div>
+        <div class="sub_menu" onclick="instrucao()">
+            instruções
+        </div>
         <div class="sub_menu" onclick="visao()">
             visão geral
         </div>
         <div class="sub_menu" onclick="analise()">
             análise
-        </div>
-        <div class="sub_menu" onclick="instrucao()">
-            instruções
-        </div>
+        </div>        
     </div>
     
     ';
